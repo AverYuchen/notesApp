@@ -41,10 +41,6 @@ const HomeScreen = () => {
     navigation.navigate('Note', { isNew: true });
   };
 
-  const viewNote = (note) => {
-    navigation.navigate('Note', { note });
-  };
-
   const deleteSelectedNotes = async () => {
     if (selectedNotes.length === 0) {
       // If no notes are selected, delete all notes
@@ -147,7 +143,7 @@ const HomeScreen = () => {
         )}
       />
       ) : (
-        <Text>No notes available</Text>
+        <Text>Add your first Note!</Text>
       )}
 
       {!selectMode ? (
@@ -167,7 +163,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingVertical: 5,
-    paddingBottom: 20, // Adds some padding at the bottom for easier scrolling
+    paddingBottom: 20 // Adds some padding at the bottom for easier scrolling
   },
   topBar: {
     flexDirection: 'row',

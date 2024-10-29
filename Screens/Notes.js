@@ -1,6 +1,6 @@
 // screens/NoteScreen.js
 import React, { useState } from 'react';
-import { View, TextInput, Button, Alert } from 'react-native';
+import { View, TextInput, Button, Alert, ScrollView } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -9,7 +9,6 @@ const NoteScreen = () => {
   const navigation = useNavigation();
   const isNew = route.params?.isNew;
   const existingNote = route.params?.note;
-  //const saveNote = route.params?.saveNote;
 
   const [title, setTitle] = useState(isNew ? '' : existingNote?.title);
   const [content, setContent] = useState(isNew ? '' : existingNote?.content);
@@ -91,24 +90,38 @@ const NoteScreen = () => {
   
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <TextInput
-        placeholder="Title"
-        value={title}
-        onChangeText={setTitle}
-        style={{ fontSize: 20, marginBottom: 20 }}
-      />
-      <TextInput
-        placeholder="Content"
-        value={content}
-        onChangeText={setContent}
-        multiline
-        style={{ fontSize: 16, marginBottom: 20 }}
-      />
-      <Button title="Save" onPress={saveNewNote} />
-      {!isNew && (
-        <Button title="Delete" color="red" onPress={deleteNote} />
-      )}
+    <View style={{ flex: 1, padding: 40}}>
+      <View style = {{marginBottom:5}}>
+        <TextInput
+          placeholder="Title"
+          value={title}
+          onChangeText={setTitle}
+          style={{ fontSize: 25, marginBottom: 10 ,
+            fontWeight:'bold'
+          }}
+        />
+      </View>
+      
+      <ScrollView contentContainerStyle ={{paddingVertical: 5, paddingBottom: 80}}>
+      <View>
+        <TextInput
+          placeholder="Content"
+          value={content}
+          onChangeText={setContent}
+          multiline
+          style={{ fontSize: 15, marginBottom: 20}}
+        />
+      </View>
+      </ScrollView>
+      
+      <View style={{ position: 'static', top: 10, bottom: 10, left: 0, right: 0 , alignItems: 'center'}}>
+        <Button title="Save" onPress={saveNewNote} />
+        {!isNew && (
+          <View style={{ marginTop: 10 }}>
+            <Button title="Delete" color="red" onPress={deleteNote} />
+          </View>
+        )}
+      </View>
     </View>
   );
 };
