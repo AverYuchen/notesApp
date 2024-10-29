@@ -32,25 +32,49 @@ const NoteScreen = () => {
   };
 
   const saveNewNote = async () => {
-    const id = new Date().getTime().toString();
-    const newNote = { id, title, content };
-    const storedNotes = await AsyncStorage.getItem('notes');
-    const notes = storedNotes ? JSON.parse(storedNotes) : [];
-    const updatedNotes = isNew ? [...notes, newNote] : notes.map(note => note.id === existingNote.id ? { ...note, title, content } : note);
-    await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
-    console.log('Note saved successfully');
-    //setNotes(updatedNotes);
-    navigation.goBack();
+    if (isNew) {
+      const id = new Date().getTime().toString();
+      const newNote = { id, title, content };
+      const storedNotes = await AsyncStorage.getItem('notes');
+      const notes = storedNotes ? JSON.parse(storedNotes) : [];
+      const updatedNotes = isNew ? [...notes, newNote] : notes.map(note => note.id === existingNote.id ? { ...note, title, content } : note);
+      await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+      console.log('Note saved successfully');
+      //setNotes(updatedNotes);
+      navigation.goBack();
+    } else {
+      try{
+        const noteid = existingNote.id
+        const storedNotes = await AsyncStorage.getItem('notes');
+        const notes = storedNotes ? JSON.parse(storedNotes) : [];
+
+        const updatedNotes = notes.map((note) => 
+          note.id === noteid ? { ...note, title, content } : note
+        );
+
+        await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+        navigation.goBack();
+      }
+      catch (error) {
+      console.error('Error updating note', error);
+    }
+
+    }
   };
 
   const deleteNote = async () => {
     Alert.alert('Delete Note', 'Are you sure you want to delete this note?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', onPress: async () => {
-          const storedNotes = await AsyncStorage.getItem('notes');
-          const notes = storedNotes ? JSON.parse(storedNotes) : [];
-          const updatedNotes = notes.filter(note => note.id !== existingNote.id);
-          await saveNote(updatedNotes);
+        console.log(existingNote)
+          await AsyncStorage.removeItem(existingNote.id);
+          const updatedNotes = await AsyncStorage.getItem('notes');
+        if (updatedNotes !== null) {
+            parsedNotes = JSON.parse(updatedNotes);
+            console.log(parsedNotes);
+        } else {
+            console.log("there's no note")
+        }
           navigation.goBack();
         },
       },
