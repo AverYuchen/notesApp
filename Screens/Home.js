@@ -1,8 +1,9 @@
 // screens/HomeScreen.js
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, Button, TouchableOpacity, Checkbox,  Alert, StyleSheet} from 'react-native';
+import { ScrollView, View, Text, FlatList, Button, TouchableOpacity,  Alert, StyleSheet} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { Menu, IconButton, Provider } from 'react-native-paper';
 import { Ionicons } from "@expo/vector-icons";
 
 
@@ -12,6 +13,8 @@ const HomeScreen = () => {
   const [selectedNote, setsSelectedNote] = useState(true);
   const [selectedNotes, setSelectedNotes] = useState([]);
   const navigation = useNavigation();
+  const [menuVisible, setMenuVisible] = useState(false);
+
 
   // Load notes from AsyncStorage each time HomeScreen is focused
   useFocusEffect(
@@ -75,7 +78,7 @@ const HomeScreen = () => {
 
   const toggleSelectionMode = () => {
     setSelectMode(!selectMode);
-    setSelectMode([]); // Clear selected notes when exiting selection mode
+    setSelectedNotes([]); // Clear selected notes when exiting selection mode
   };
 
   const toggleNoteSelection = (noteId) => {
@@ -86,57 +89,91 @@ const HomeScreen = () => {
     }
   };
 
-  return (
-    <View style={{ flex: 1, padding: 20 }}>
-      {selectMode && (
-        <View style={styles.topBar}>
-          <TouchableOpacity onPress={toggleSelectionMode} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color="#333" />
-          </TouchableOpacity>
-          <Text style={styles.selectedCount}>
-            {selectedNotes.length} selected
-          </Text>
-        </View>
-      )}
+  const openMenu = () => setMenuVisible(true);
+  const closeMenu = () => setMenuVisible(false);
 
+  return (
+    <Provider>
+      <View style={styles.layout}>
+        <View style={styles.topBar}>
+          {selectMode ? (
+            <TouchableOpacity onPress={toggleSelectionMode} style={styles.closeButton}>
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+          ) : (
+            <Menu
+              visible={menuVisible}
+              onDismiss={closeMenu}
+              anchor={
+                <IconButton
+                  icon="dots-horizontal"
+                  size={24}
+                  onPress={openMenu}
+                  color="#333"
+                />
+              }
+            >
+              <Menu.Item onPress={() => { toggleSelectionMode(); closeMenu(); }} title="Select" />
+              <Menu.Item onPress={() => alert("Other Option")} title="Other Option" />
+            </Menu>
+          )}
+          {selectMode && (
+            <Text style={styles.selectedCount}>
+              {selectedNotes.length} selected
+            </Text>
+          )}
+        </View>
+        
       {notes.length > 0 ? (
         <FlatList
         data={notes}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => selectedNote ? navigation.navigate('Note', { note: item }) : ''}>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <TouchableOpacity onPress={() => selectMode ? toggleNoteSelection(item.id):navigation.navigate('Note', { note: item })}>
             <View style={styles.noteItem}>
               {selectMode && (
                 <Ionicons
                   name={selectedNotes.includes(item.id) ? "checkbox" : "square-outline"}
                   size={24}
                   color="#333"
-                  onPress={() => selectedNotes(item.id)}
+                  onPress={() => toggleNoteSelection(item.id)}
                 />
               )}
               <Text style={styles.noteText}>{item.title}</Text>
             </View>
           </TouchableOpacity>
+          </ScrollView>
         )}
       />
       ) : (
         <Text>No notes available</Text>
       )}
+
       {!selectMode ? (
         <Button title="Add Note" onPress={addNote} />
       ) : (
         <Button title="Delete Selected" color="red" onPress={deleteSelectedNotes} />
       )}
     </View>
+  </Provider>
   );
 };
 
 const styles = StyleSheet.create({
+  layout: {
+    flex: 1, 
+    padding: 20
+  },
+  scrollContainer: {
+    paddingVertical: 5,
+    paddingBottom: 20, // Adds some padding at the bottom for easier scrolling
+  },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 15,
+    padding: 10,
     backgroundColor: '#f1f1f1',
   },
   closeButton: {

@@ -65,21 +65,30 @@ const NoteScreen = () => {
   const deleteNote = async () => {
     Alert.alert('Delete Note', 'Are you sure you want to delete this note?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', onPress: async () => {
-        console.log(existingNote)
-          await AsyncStorage.removeItem(existingNote.id);
-          const updatedNotes = await AsyncStorage.getItem('notes');
-        if (updatedNotes !== null) {
-            parsedNotes = JSON.parse(updatedNotes);
-            console.log(parsedNotes);
-        } else {
-            console.log("there's no note")
+      { 
+        text: 'Delete', 
+        onPress: async () => {
+          try {
+            // Retrieve the existing notes list
+            const storedNotes = await AsyncStorage.getItem('notes');
+            const notes = storedNotes ? JSON.parse(storedNotes) : [];
+  
+            // Filter out the note to delete based on its unique `noteid`
+            const updatedNotes = notes.filter(note => note.id !== existingNote.id);
+  
+            // Save the updated notes list back to AsyncStorage
+            await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+  
+            console.log('Note deleted successfully');
+            navigation.goBack();  // Go back after deleting
+          } catch (error) {
+            console.error("Failed to delete the note", error);
+          }
         }
-          navigation.goBack();
-        },
       },
     ]);
   };
+  
 
   return (
     <View style={{ flex: 1, padding: 20 }}>
