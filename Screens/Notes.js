@@ -10,27 +10,11 @@ const NoteScreen = () => {
   const isNew = route.params?.isNew;
   const existingNote = route.params?.note;
 
+  //const [createnew, setCreateNew] = '';
   const [title, setTitle] = useState(isNew ? '' : existingNote?.title);
   const [content, setContent] = useState(isNew ? '' : existingNote?.content);
-  
-  const saveNote = async (newNote) => {
-    try {
-      // Retrieve the current notes from storage
-      const existingNotes = await AsyncStorage.getItem('notes');
-      const notes = existingNotes ? JSON.parse(existingNotes) : [];
-  
-      // Add the new note to the array
-      notes.push(newNote);
-  
-      // Save the updated notes array back to AsyncStorage
-      await AsyncStorage.setItem('notes', JSON.stringify(notes));
-      console.log('Note saved successfully');
-    } catch (error) {
-      console.error('Failed to save the note to storage', error);
-    }
-  };
 
-  const saveNewNote = async () => {
+  const saveNote = async () => {
     if (isNew) {
       const id = new Date().getTime().toString();
       const newNote = { id, title, content };
@@ -44,14 +28,20 @@ const NoteScreen = () => {
     } else {
       try{
         const noteid = existingNote.id
+        const noteTitle = existingNote.title
         const storedNotes = await AsyncStorage.getItem('notes');
         const notes = storedNotes ? JSON.parse(storedNotes) : [];
 
         const updatedNotes = notes.map((note) => 
-          note.id === noteid ? { ...note, title, content } : note
+          note.id === noteid && note.title === noteTitle ? { ...note, title, content } : note
         );
+        /*const id = new Date().getTime().toString();
+        newnote = {id, title, content}
+        const createAnotherNote = [...notes, newnote]*/
 
         await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+        isNew = true;
+        saveNote();
         navigation.goBack();
       }
       catch (error) {
@@ -115,7 +105,7 @@ const NoteScreen = () => {
       </ScrollView>
       
       <View style={{ position: 'static', top: 10, bottom: 10, left: 0, right: 0 , alignItems: 'center'}}>
-        <Button title="Save" onPress={saveNewNote} />
+        <Button title="Save" onPress={saveNote} />
         {!isNew && (
           <View style={{ marginTop: 10 }}>
             <Button title="Delete" color="red" onPress={deleteNote} />

@@ -8,11 +8,10 @@ import { Ionicons } from "@expo/vector-icons";
 
 
 const HomeScreen = () => {
+  const navigation = useNavigation();
   const [notes, setNotes] = useState([]);
   const [selectMode, setSelectMode] = useState(false);
-  const [selectedNote, setsSelectedNote] = useState(true);
   const [selectedNotes, setSelectedNotes] = useState([]);
-  const navigation = useNavigation();
   const [menuVisible, setMenuVisible] = useState(false);
 
 
